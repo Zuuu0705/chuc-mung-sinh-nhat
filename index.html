@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chúc mừng sinh nhật 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#ffe4ef;--bg2:#e9e1ff;--card:#fffffff0;--ink:#5a3a55;--pink:#ff6fa5;--soft:#ffd1e3;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#2a1830;--bg2:#1c1a3a;--card:#3a2646ee;--ink:#ffe9f3;--pink:#ff8fb8;--soft:#6b3a5c;color-scheme:dark}}
+:root[data-theme="dark"]{--bg1:#2a1830;--bg2:#1c1a3a;--card:#3a2646ee;--ink:#ffe9f3;--pink:#ff8fb8;--soft:#6b3a5c;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;font-family:'Baloo 2','Segoe UI',system-ui,sans-serif;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2));background-color:var(--bg1);overflow-x:hidden}
+.balloons{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+.b{position:absolute;bottom:-120px;font-size:44px;animation:up linear infinite;opacity:.85}
+@keyframes up{to{transform:translateY(-120vh) rotate(15deg)}}
+canvas{position:fixed;inset:0;pointer-events:none;z-index:5;width:100%;height:100%}
+main{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:28px 18px 60px;text-align:center}
+h1{font-family:'Pacifico',cursive,serif;font-weight:400;font-size:clamp(30px,8vw,44px);color:var(--pink);margin:6px 0 2px;text-shadow:2px 2px 0 var(--soft)}
+.sub{margin:0 0 18px;font-size:18px}
+.photo{position:relative;width:210px;height:210px;margin:0 auto 14px;border-radius:50%;border:6px solid #fff;box-shadow:0 0 0 5px var(--pink),0 12px 30px #ff6fa555;background:var(--soft) center/cover no-repeat;display:grid;place-items:center;cursor:pointer;animation:float 3.5s ease-in-out infinite}
+.photo span{font-size:15px;padding:12px;line-height:1.2}
+.photo::before,.photo::after{position:absolute;font-size:30px}
+.photo::before{content:"🎀";top:-14px;left:12px;transform:rotate(-20deg)}
+.photo::after{content:"👑";top:-30px;right:46px;transform:rotate(12deg)}
+@keyframes float{50%{transform:translateY(-8px)}}
+.name{font-size:28px;font-weight:700;margin:6px 0 14px;outline:none}
+.card{background:var(--card);border-radius:26px;padding:22px 20px;box-shadow:0 10px 30px #b06ab333;margin-bottom:22px;position:relative}
+.card::before{content:"💌";position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:30px}
+.msg{font-size:18px;line-height:1.6;white-space:pre-wrap;outline:none;min-height:80px}
+.from{margin-top:12px;font-weight:700;color:var(--pink);outline:none}
+.cake{font-size:84px;line-height:1;cursor:pointer;user-select:none;position:relative;display:inline-block}
+.flame{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:34px;animation:flick .5s infinite alternate}
+.flame.off{display:none}
+@keyframes flick{to{transform:translateX(-50%) scale(1.15) rotate(5deg)}}
+.hint{font-size:15px;opacity:.8;margin:8px 0 18px}
+button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:10px 22px;background:var(--pink);color:#fff;cursor:pointer;box-shadow:0 5px 0 #d44d82;margin:4px}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #d44d82}
+button.ghost{background:transparent;color:var(--ink);box-shadow:none;border:2px dashed var(--pink);font-size:14px;padding:6px 16px}
+.editing [contenteditable]{background:#fff6;border-radius:10px;padding:4px 8px;outline:2px dashed var(--pink)}
+</style>
+</head>
+<body>
+<div class="balloons" id="balloons" aria-hidden="true"></div>
+<canvas id="c"></canvas>
+<main id="app">
+  <h1>Happy Birthday!</h1>
+  <p class="sub">🎉 Chúc mừng sinh nhật 🎉</p>
+
+  <div class="photo" id="photo" title="Bấm để chọn ảnh"><span>📷<br>Bấm vào đây để chọn ảnh</span></div>
+  <input type="file" id="file" accept="image/*" hidden>
+
+  <div class="name" id="name" contenteditable="false">Tên người nhận</div>
+
+  <div class="card">
+    <div class="msg" id="msg" contenteditable="false">Chúc bạn sinh nhật thật vui, luôn khỏe mạnh, xinh đẹp và gặp thật nhiều điều may mắn nhé! 💖
+Mong mỗi ngày của bạn đều ngập tràn tiếng cười và niềm hạnh phúc.</div>
+    <div class="from" id="from" contenteditable="false">— Người gửi 🌸</div>
+  </div>
+
+  <div class="cake" id="cake">🎂<span class="flame" id="flame">🔥</span></div>
+  <p class="hint" id="hint">Bấm vào bánh để thổi nến và ước một điều ước ✨</p>
+  <button id="boom">🎈 Bắn pháo giấy</button>
+  <br>
+  <button class="ghost" id="edit">✏️ Chỉnh sửa</button>
+</main>
+
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  // Bóng bay
+  var em=["🎈","🎈","🎈","💖","⭐","🌸","🎀"],bl=$("balloons");
+  for(var i=0;i<14;i++){var s=document.createElement("span");s.className="b";s.textContent=em[i%em.length];
+    s.style.left=(Math.random()*95)+"%";s.style.animationDuration=(9+Math.random()*10)+"s";
+    s.style.animationDelay=(-Math.random()*14)+"s";s.style.fontSize=(30+Math.random()*28)+"px";bl.appendChild(s)}
+  // Pháo giấy
+  var cv=$("c"),cx=cv.getContext("2d"),ps=[],run=false;
+  function size(){cv.width=innerWidth;cv.height=innerHeight}size();addEventListener("resize",size);
+  var cols=["#ff6fa5","#ffd166","#7bdff2","#b794f6","#8ce99a","#ff9f68"];
+  function boom(){for(var i=0;i<140;i++)ps.push({x:innerWidth/2,y:innerHeight*0.45,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,r:4+Math.random()*5,c:cols[i%6],a:Math.random()*6,l:130+Math.random()*60});
+    if(!run){run=true;tick()}}
+  function tick(){cx.clearRect(0,0,cv.width,cv.height);
+    ps=ps.filter(function(p){return p.l>0});
+    ps.forEach(function(p){p.x+=p.vx;p.y+=p.vy;p.vy+=.28;p.vx*=.99;p.a+=.2;p.l--;
+      cx.save();cx.translate(p.x,p.y);cx.rotate(p.a);cx.fillStyle=p.c;cx.globalAlpha=Math.min(1,p.l/40);cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.6);cx.restore()});
+    if(ps.length)requestAnimationFrame(tick);else{run=false;cx.clearRect(0,0,cv.width,cv.height)}}
+  $("boom").onclick=boom;
+  $("cake").onclick=function(){var f=$("flame");f.classList.toggle("off");
+    if(f.classList.contains("off")){$("hint").textContent="Điều ước đã được gửi đi rồi! 🌟 Chúc điều ước thành sự thật nhé 💖";boom()}
+    else $("hint").textContent="Bấm vào bánh để thổi nến và ước một điều ước ✨"};
+  setTimeout(boom,600);
+  // Chọn ảnh
+  function setPhoto(u){var p=$("photo");p.style.backgroundImage="url("+u+")";p.innerHTML=""}
+  $("photo").onclick=function(){$("file").click()};
+  $("file").onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){setPhoto(r.result)};r.readAsDataURL(f)};
+  // Chế độ chỉnh sửa
+  var on=false;
+  $("edit").onclick=function(){on=!on;["name","msg","from"].forEach(function(i){$(i).setAttribute("contenteditable",on)});
+    $("app").classList.toggle("editing",on);this.textContent=on?"✅ Xong":"✏️ Chỉnh sửa"};
+})();
+</script>
+</body>
+</html>
